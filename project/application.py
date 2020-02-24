@@ -1,3 +1,5 @@
+from tkinter import *
+from tkinter import messagebox
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -79,14 +81,17 @@ def change_page(nums):
 def main(commodity):
     global ROW
     ROW=0
-    total=get_first_page(commodity)
-    print(total)
+    get_first_page(commodity)
     # 实现页面的跳转
-    total=1
-    for i in range(total):
+    global total
+    total=total.get()
+    for i in range(int(total)):
         change_page(i+2)
 
     workbook.close()
+    global show
+    browser.close()
+    show['text']="搜索完成"
 
 def create_sheet(commodity_name):
     global workbook
@@ -102,11 +107,65 @@ def create_sheet(commodity_name):
     worksheet.write(0, COL + 6, '链接')
 
 
-if __name__ == '__main__':
+
+class Application(Frame):
+
+    def __init__(self,master=None):
+        super().__init__(master)
+        self.master=master
+        self.pack()
+        self.createWidget()
+
+    def createWidget(self):
+        Label(self,text="~~~~~~~~~~").grid(row=0)
+        global commdity,total
+        Label(self, text="商品名称").grid(row=1)
+        Label(self, text="删选数量").grid(row=2)
+
+        e1 = Entry(self)
+        e2 = Entry(self)
+        commdity = e1
+        total = e2
+        e1.grid(row=1, column=1)
+        e2.grid(row=2, column=1)
+
+        button2 = Button(self, text='Start', command=self.start_app)
+        button2.grid(row=3, column=0)
+
+        button1 = Button(self, text='END',command=self.end_app)
+        button1.grid(row=3, column=2)
+        global show
+        show = Label(root, width=40, height=3, bg="#fff")
+        show.pack()
+        show['text']=""
+        mainloop()
+
+    def start_app(self):
+        global show
+        show['text']="运行中"
+        global commdity
+        print(commdity.get())
+        commodity=commdity.get()
+        commodity_name=commodity+".xlsx"
+        create_sheet(commodity_name)
+        main(commodity)
+
+    def end_app(self):
+        global show
+        show['text']='程序已停止执行'
+
+    def suc_app(self):
+        global show
+        show['text']="运行成功"
+
+
+
+if __name__=='__main__':
+    root=Tk()
     global ROW
     NUM = 0
-    commodity='李宁'
-    commodity_name=commodity+".xlsx"
-    create_sheet(commodity_name)
-    main(commodity)
+    root.geometry("360x180")
+    app=Application(master=root)
+    root.mainloop()
 
+# if __name__ == '__main__':
