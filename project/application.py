@@ -49,15 +49,8 @@ def deal_with_html():
             'skcolor_ljg':item.find('.skcolor_ljg').text(),
             'em':item.find('div > div.p-name.p-name-type-2 > a > em').text()
         }
-        global NUM
-        if(NUM!=0):
-            product['href']='https:'+product['href']
-            NUM+=1
-            if(NUM==6):
-                NUM=0
-        elif (NUM==0):
-            product['href'] = product['href']
-            NUM+=1
+        if product['href'][0] != 'h':
+            product['href'] = 'https:' + product['href']
 
 
         worksheet.write(ROW, COL, ROW-1)
@@ -76,22 +69,29 @@ def change_page(nums):
     input_page_num.send_keys(nums)
     cnt_click=browser.find_element_by_xpath('//*[@id="J_bottomPage"]/span[2]/a')
     cnt_click.click()
+    global show
+    show['text']="正在处理"+str(nums)+"网页"
     deal_with_html()
 
 def main(commodity):
-    global ROW
-    ROW=0
-    get_first_page(commodity)
-    # 实现页面的跳转
-    global total
-    total=total.get()
-    for i in range(int(total)):
-        change_page(i+2)
+    try:
+        global ROW
+        ROW=0
+        get_first_page(commodity)
+        # 实现页面的跳转
+        global total
+        total=total.get()
+        for i in range(int(total)):
+            change_page(i+2)
 
-    workbook.close()
-    global show
-    browser.close()
-    show['text']="搜索完成"
+        workbook.close()
+        global show
+        browser.close()
+        show['text']="搜索完成"
+    except Exception as e:
+        show['text']=str(e)
+        print('原因：'+str(e))
+        browser.close()
 
 def create_sheet(commodity_name):
     global workbook
@@ -156,13 +156,14 @@ class Application(Frame):
 
     def suc_app(self):
         global show
+        browser.close()
         show['text']="运行成功"
 
 
 
 if __name__=='__main__':
     root=Tk()
-    global ROW
+    global ROW,show
     NUM = 0
     root.geometry("360x180")
     app=Application(master=root)
